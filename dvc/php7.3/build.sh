@@ -10,7 +10,7 @@ TERMUX_PKG_SHA256=42f00a15419e05771734b7159c8d39d639b8a5a6770413adfa2615f6f923d9
 TERMUX_PKG_HOSTBUILD=true
 # Build the native php without xml support as we only need phar:
 TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS="--disable-libxml --disable-dom --disable-simplexml --disable-xml --disable-xmlreader --disable-xmlwriter --without-pear"
-TERMUX_PKG_DEPENDS="libiconv, libandroid-glob, libxml2, liblzma, openssl-1.1, pcre2, libbz2, libcrypt, libcurl, libgd, readline, freetype, libandroid-support, zlib"
+TERMUX_PKG_DEPENDS="libiconv, libandroid-glob, libxml2, liblzma, openssl-1.1, pcre2, libbz2, libcrypt, libcurl, libgd, readline, freetype, libandroid-support, zlib, apache2, openssl1.1-tool"
 # mysql modules were initially shared libs
 TERMUX_PKG_CONFLICTS="php-mysql, php-dev, php7, php7.2, php, php7-zts, php7-crack, php7.2-zts, php-8.1, php7-huy-crack, php*"
 TERMUX_PKG_REPLACES="php-mysql, php-dev, php7, php7.2, php, php7-zts, php7-crack, php7.2-zts, php-8.1, php7-huy-crack, php*"
