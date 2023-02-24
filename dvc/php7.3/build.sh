@@ -130,14 +130,10 @@ termux_step_post_make_install() {
 
 	sed -i 's/SED=.*/SED=sed/' $TERMUX_PREFIX/bin/phpize
 }
-termux_step_create_debscripts() {
-        cat <<-EOF > ./postinst
-                #!$TERMUX_PREFIX/bin/sh
-                echo
-                echo "********"
-                echo "PHP 7.3 reaches its end of life and is no longer supported afterwards."
-                echo "Please consider migrating to a newer version of PHP."
-                echo "********"
-                echo
-        EOF
-}
+#termux_step_create_debscripts() {
+     #   cat <<-EOF > ./postinst
+    #            #!$TERMUX_PREFIX/bin/sh
+   #             echo
+  #              echo "********"
+ #               echo "PHP 7.3 reaches its end of life and is no longer supported afterwards."
+#                echo "Please consider migrating to a ne
