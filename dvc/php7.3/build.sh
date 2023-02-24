@@ -91,11 +91,11 @@ termux_step_pre_configure() {
         local _cc=$(basename $CC)
         rm -rf $wrapper_bin
         mkdir -p $wrapper_bin
-        cat <<-EOF > $wrapper_bin/$_cc
-                #!$(command -v sh)
-                exec $(command -v $_cc) -L$TERMUX_PREFIX/lib/openssl-1.1 \
-                        -Wno-unused-command-line-argument "\$@"
-        EOF
+	cat <<-EOF > $wrapper_bin/$_cc
+		#!$(command -v sh)
+		exec $(command -v $_cc) -L$TERMUX_PREFIX/lib/openssl-1.1 \
+-Wno-unused-command-line-argument "\$@"
+	EOF
         chmod 0700 $wrapper_bin/$_cc
         export PATH="$wrapper_bin:$PATH"
 }
