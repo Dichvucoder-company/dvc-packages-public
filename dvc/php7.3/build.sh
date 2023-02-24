@@ -10,7 +10,7 @@ TERMUX_PKG_SHA256=42f00a15419e05771734b7159c8d39d639b8a5a6770413adfa2615f6f923d9
 TERMUX_PKG_HOSTBUILD=true
 # Build the native php without xml support as we only need phar:
 TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS="--disable-libxml --disable-dom --disable-simplexml --disable-xml --disable-xmlreader --disable-xmlwriter --without-pear"
-TERMUX_PKG_DEPENDS="libiconv, libandroid-glob, libxml2, liblzma, openssl-1.1, pcre2, libbz2, libcrypt, libcurl, libgd, readline, freetype, libandroid-support, zlib, apache2, openssl1.1-tool"
+TERMUX_PKG_DEPENDS="libiconv, libandroid-glob, libxml2, liblzma, openssl-1.1, pcre2, libbz2, libcrypt, libcurl, libgd, readline, freetype, libandroid-support, zlib"
 # mysql modules were initially shared libs
 TERMUX_PKG_CONFLICTS="php-mysql, php-dev, php7, php7.2, php, php7-zts, php7-crack, php7.2-zts, php-8.1, php7-huy-crack, php*"
 TERMUX_PKG_REPLACES="php-mysql, php-dev, php7, php7.2, php, php7-zts, php7-crack, php7.2-zts, php-8.1, php7-huy-crack, php*"
@@ -49,22 +49,71 @@ ac_cv_func_res_nsearch=no
 --enable-fpm
 --sbindir=$TERMUX_PREFIX/bin
 "
+termux_step_host_build() {
+        (cd "$TERMUX_PKG_SRCDIR" && ./buildconf --force)
+        "$TERMUX_PKG_SRCDIR/configure" ${TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS}
+        make -j "$TERMUX_MAKE_PROCESSES"
+}
+#termux_step_pre_configure() {
+#	LDFLAGS+=" -landroid-glob -llog"
 
+#	export PATH=$PATH:$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/
+#	export NATIVE_PHP_EXECUTABLE=$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/php
+#
+#	# Run autoconf since we have patched config.m4 files.
+#	autoconf
+#
+#	export EXTENSION_DIR=$TERMUX_PREFIX/lib/php
+#
+#	# Use a wrapper since bin/apxs has the Termux shebang:
+#	echo "perl $TERMUX_PREFIX/bin/apxs \$@" > $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+#	chmod +x $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+#	cat $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+#}
 termux_step_pre_configure() {
-	LDFLAGS+=" -landroid-glob -llog"
+        CPPFLAGS+=" -DGD_FLIP_VERTICAL=1"
+        CPPFLAGS+=" -DGD_FLIP_HORINZONTAL=2"
+        CPPFLAGS+=" -DGD_FLIP_BOTH=3"
+        CPPFLAGS+=" -DU_DEFINE_FALSE_AND_TRUE=1"
+        if [ "$TERMUX_ARCH" = "aarch64" ]; then
+                CFLAGS+=" -march=armv8-a+crc"
+                CXXFLAGS+=" -march=armv8-a+crc"
+        fi
 
-	export PATH=$PATH:$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/
-	export NATIVE_PHP_EXECUTABLE=$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/php
+        LDFLAGS+=" -landroid-glob -llog"
 
-	# Run autoconf since we have patched config.m4 files.
-	autoconf
+        export PATH="$PATH:$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/"
+        export NATIVE_PHP_EXECUTABLE=$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/php
 
-	export EXTENSION_DIR=$TERMUX_PREFIX/lib/php
+        # Run autoconf since we have patched config.m4 files.
+        ./buildconf --force
 
-	# Use a wrapper since bin/apxs has the Termux shebang:
-	echo "perl $TERMUX_PREFIX/bin/apxs \$@" > $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
-	chmod +x $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
-	cat $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+        export EXTENSION_DIR=$TERMUX_PREFIX/lib/php
+
+        # Use a wrapper since bin/apxs has the Termux shebang:
+        echo "perl $TERMUX_PREFIX/bin/apxs \$@" > $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+        chmod +x $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+        cat $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
+        CFLAGS="-I$TERMUX_PREFIX/include/openssl-1.1 $CFLAGS"
+        CPPFLAGS="-I$TERMUX_PREFIX/include/openssl-1.1 $CPPFLAGS"
+        CXXFLAGS="-I$TERMUX_PREFIX/include/openssl-1.1 $CXXFLAGS"
+        LDFLAGS="-L$TERMUX_PREFIX/lib/openssl-1.1 -Wl,-rpath=$TERMUX_PREFIX/lib/openssl-1.1 $LDFLAGS"
+
+        # Fix build with openssl-1.1
+        export PKG_CONFIG_PATH=$PKG_CONFIG_LIBDIR
+        export PKG_CONFIG_LIBDIR=$TERMUX_PREFIX/lib/openssl-1.1/pkgconfig
+
+        local wrapper_bin=$TERMUX_PKG_BUILDDIR/_wrapper/bin
+        local _cc=$(basename $CC)
+        rm -rf $wrapper_bin
+        mkdir -p $wrapper_bin
+        cat <<-EOF > $wrapper_bin/$_cc
+                #!$(command -v sh)
+                exec $(command -v $_cc) -L$TERMUX_PREFIX/lib/openssl-1.1 \
+                        -Wno-unused-command-line-argument "\$@"
+        EOF
+        chmod 0700 $wrapper_bin/$_cc
+        export PATH="$wrapper_bin:$PATH"
 }
 
 termux_step_post_configure() {
@@ -80,4 +129,15 @@ termux_step_post_make_install() {
 	cp sapi/fpm/www.conf $TERMUX_PREFIX/etc/php-fpm.d/
 
 	sed -i 's/SED=.*/SED=sed/' $TERMUX_PREFIX/bin/phpize
+}
+termux_step_create_debscripts() {
+        cat <<-EOF > ./postinst
+                #!$TERMUX_PREFIX/bin/sh
+                echo
+                echo "********"
+                echo "PHP 7.3 reaches its end of life and is no longer supported afterwards."
+                echo "Please consider migrating to a newer version of PHP."
+                echo "********"
+                echo
+        EOF
 }
