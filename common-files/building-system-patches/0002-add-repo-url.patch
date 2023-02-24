@@ -1,0 +1,25 @@
+Add apt repo urls of dvc repository to download dependencies.
+--- a/scripts/properties.sh
++++ b/scripts/properties.sh
+@@ -47,18 +47,21 @@
+ 	https://packages-cf.termux.dev/apt/termux-main
+ 	https://packages-cf.termux.dev/apt/termux-root
+ 	https://packages-cf.termux.dev/apt/termux-x11
++	https://repo.dichvucoder.com
+ )
+ 
+ TERMUX_REPO_DISTRIBUTION=(
+ 	stable
+ 	root
+ 	x11
++	dvc-packages
+ )
+ 
+ TERMUX_REPO_COMPONENT=(
+ 	main
+ 	stable
+ 	main
++	dvc
+ )
+ 
+ # Allow to override setup.
