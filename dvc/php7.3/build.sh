@@ -54,22 +54,6 @@ termux_step_host_build() {
         "$TERMUX_PKG_SRCDIR/configure" ${TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS}
         make -j "$TERMUX_MAKE_PROCESSES"
 }
-#termux_step_pre_configure() {
-#	LDFLAGS+=" -landroid-glob -llog"
-
-#	export PATH=$PATH:$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/
-#	export NATIVE_PHP_EXECUTABLE=$TERMUX_PKG_HOSTBUILD_DIR/sapi/cli/php
-#
-#	# Run autoconf since we have patched config.m4 files.
-#	autoconf
-#
-#	export EXTENSION_DIR=$TERMUX_PREFIX/lib/php
-#
-#	# Use a wrapper since bin/apxs has the Termux shebang:
-#	echo "perl $TERMUX_PREFIX/bin/apxs \$@" > $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
-#	chmod +x $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
-#	cat $TERMUX_PKG_TMPDIR/apxs-wrapper.sh
-#}
 termux_step_pre_configure() {
         CPPFLAGS+=" -DGD_FLIP_VERTICAL=1"
         CPPFLAGS+=" -DGD_FLIP_HORINZONTAL=2"
@@ -130,10 +114,3 @@ termux_step_post_make_install() {
 
 	sed -i 's/SED=.*/SED=sed/' $TERMUX_PREFIX/bin/phpize
 }
-#termux_step_create_debscripts() {
-     #   cat <<-EOF > ./postinst
-    #            #!$TERMUX_PREFIX/bin/sh
-   #             echo
-  #              echo "********"
- #               echo "PHP 7.3 reaches its end of life and is no longer supported afterwards."
-#                echo "Please consider migrating to a ne
