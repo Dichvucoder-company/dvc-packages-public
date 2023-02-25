@@ -11,7 +11,7 @@ TERMUX_PKG_SRCURL=https://secure.php.net/distributions/php-${TERMUX_PKG_VERSION}
 TERMUX_PKG_HOSTBUILD=true
 # Build the native php without xml support as we only need phar:
 TERMUX_PKG_EXTRA_HOSTBUILD_CONFIGURE_ARGS="--disable-libxml --disable-dom --disable-simplexml --disable-xml --disable-xmlreader --disable-xmlwriter --without-pear"
-TERMUX_PKG_DEPENDS="libandroid-glob, libxml2, liblzma, openssl-1.1, pcre, libbz2, libcrypt, libcurl, libgd, readline, freetype, postgresql, apache2"
+TERMUX_PKG_DEPENDS="libandroid-glob, libxml2, liblzma, openssl-1.1, pcre, libbz2, libcrypt, libcurl, libgd, readline, freetype, postgresql, apache2, zlib, libzip, bzip2"
 # mysql modules were initially shared libs
 TERMUX_PKG_CONFLICTS="php, php7, php7-crack, php7, php7-zts, php7.2-zts, php7.2-threads, php-8.1"
 TERMUX_PKG_REPLACES=${TERMUX_PKG_CONFLICTS}
@@ -125,7 +125,7 @@ termux_step_create_debscripts() {
 		#!$TERMUX_PREFIX/bin/sh
 		echo
 		echo "********"
-		echo "PHP 7.2 reaches its end of life and is no longer supported afterwards."
+		echo "PHP 7.3 reaches its end of life and is no longer supported afterwards."
 		echo "Please consider migrating to a newer version of PHP."
 		echo "Build BY Dichvucoder"
 		echo "********"
