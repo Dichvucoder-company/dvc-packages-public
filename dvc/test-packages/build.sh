@@ -6,6 +6,7 @@ TERMUX_PKG_VERSION=0.1.1
 TERMUX_PKG_SKIP_SRC_EXTRACT=true
 TERMUX_PKG_BUILD_IN_SRC=true
 
+
 termux_step_make() {
 	$CC $CFLAGS $CPPFLAGS $TERMUX_PKG_BUILDER_DIR/main.c -o hello-dvc
 }
